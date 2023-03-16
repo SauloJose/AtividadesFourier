@@ -12,6 +12,7 @@ pkg load io
 %leitura do arquivo para elabora a transformada
 x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3')';
 N = length(x);
+time = 0:1:N-1;
 
 % ===============================|| Algorítmo do DFT ||=============================
 
@@ -90,3 +91,6 @@ plot(intervaloApoio,X2), title('Sinal aproximado'),xlabel('Horas a partir de 15 
 figure(3)
 plot(intervaloApoio,x,intervaloApoio,X2),title('Comparando os Sinais'),xlabel('Horas a partir de 15 de junho às 0:00 h'),ylabel(' (MWh/h)');
 
+%Mapa de calor
+figure(4);
+imagesc(time, freal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
