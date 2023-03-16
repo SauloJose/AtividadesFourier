@@ -92,3 +92,9 @@ str2= "Fase do STFT na janela"+S;
 %Plotando Transformada STFT na janela
 subplot(3,1,2), stem(freal, abs(Y(:,S))), title(str),xlabel('Frequência em amostras/Hora');
 subplot(3,1,3), stem(freal, angle(Y(:,S))), title(str2),xlabel('Frequência em amostras/Hora');
+
+
+%Tempo entre cada amostra
+time = 0:1:L-1;
+figure(2);
+imagesc(time, freal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
