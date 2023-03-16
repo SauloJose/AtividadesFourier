@@ -2,7 +2,7 @@
 % Autor: Saulo José Almeida Silva 
 % Descrição: Utilizando o método do STFT (Short Time Fourier Transformation)
 % para identificar os digitos discados num celular antigo 
-% Data: 13/02/2022
+% Data: 13/03/2022
 % ===================================================================================
 clear all, close all; clc
 
@@ -59,13 +59,11 @@ freqDisc = 1/N; %Frequência+ discreta
 freqReal= freqDisc * fs * (0:1:N-1); %Em kHz
 
 %plotando um gráfico específico
-S =1304; %Número da janela
+
 figure(1);
-subplot(3,1,1), plot(tempo, x), title('sinal sonoro'),xlabel('tempo em segundos')
-str = "módulo do STFT na janela "+S;
-subplot(3,1,2), stem(freqReal,abs(Y(:,S))), title(str),xlabel('frequência em Hz')
-subplot(3,1,3), stem(freqReal,angle(Y(:,S))), title('fase'),xlabel('frequência em Hz')
+plot(tempo, x), title('sinal sonoro'),xlabel('tempo em segundos')
 %title('fase'),xlabel('frequência em Hz')
+figure(3);imagesc(tempo, freqReal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
 
 % ==========================|| Encontrar os Dígitos ||================================
 %Preciso varrer cada janela, e observar as maiores frequências observadas.
@@ -97,9 +95,9 @@ pot(pulso)=potMax;
 for m=0:1:M
     %procurar as janelas cuja potência indique que haja frequência
     if (pot(1,m+1) >= potMax*0.25)%se a potência é grande
-        %dividindo as frequências
-        %frequências de 600 a 1000hz
+        %dividindo as frequência
         if m+25 < M-1 %Pegar um valor mais central do pulso
+            %frequências de 600 a 1000hz
             Ymin = abs(Y(intervalo1,m+25));
             [a, f1Max] = max(Ymin);
             f1Max = (intervalo1(f1Max)-1)*fs/N;
@@ -108,8 +106,9 @@ for m=0:1:M
         
             Ymax = abs(Y(intervalo2,m+25));
             [a, f2Max] = max(Ymax);
-            f2Max =(intervalo2(f2Max)-1)*fs/N;
+            f2Max =(intervalo2(f2Max)-1)*fs/N; 
         else
+            %frequências de 600 a 1000hz
             Ymin = abs(Y(intervalo1,m+1));
             [a, f1Max] = max(Ymin);
             f1Max = (intervalo1(f1Max)-1)*fs/N;
@@ -141,3 +140,4 @@ end
 
 %Exibindo digitos
 digitos
+
