@@ -2,7 +2,7 @@
 % Autor: Saulo José Almeida Silva
 % Descrição: Utilizando o método do STFT (Short Time Fourier Transformation)
 % para identificar os digitos discados num celular antigo
-% Data: 13/02/2022
+% Data: 13/03/2022
 % ===================================================================================
 clear all, close all; clc
 
@@ -59,13 +59,12 @@ freqDisc = 1/N; %Frequência+ discreta
 freqReal= freqDisc * fs * (0:1:N-1); %Em kHz
 
 %plotando um gráfico específico
-S =1304; %Número da janela
+
 figure(1);
-subplot(3,1,1), plot(tempo, x), title('sinal sonoro'),xlabel('tempo em segundos')
-str = "módulo do STFT na janela "+S;
-subplot(3,1,2), stem(freqReal,abs(Y(:,S))), title(str),xlabel('frequência em Hz')
-subplot(3,1,3), stem(freqReal,angle(Y(:,S))), title('fase'),xlabel('frequência em Hz')
+plot(tempo, x), title('sinal sonoro'),xlabel('tempo em segundos')
 %title('fase'),xlabel('frequência em Hz')
+figure(3);imagesc(tempo, freqReal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
+
 
 % ==========================|| Encontrar os Dígitos ||================================
 %Preciso varrer cada janela, e observar as maiores frequências observadas.
@@ -142,5 +141,4 @@ endfor
 
 %Exibindo digitos
 digitos
-
 
