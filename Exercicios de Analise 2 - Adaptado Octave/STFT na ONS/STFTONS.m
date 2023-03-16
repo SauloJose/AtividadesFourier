@@ -95,3 +95,6 @@ str2= "Fase do STFT na janela S";
 subplot(3,1,2), stem(freal, abs(Y(:,S))), title(str),xlabel('Frequência em amostras/Hora');
 subplot(3,1,3), stem(freal, angle(Y(:,S))), title(str2),xlabel('Frequência em amostras/Hora');
 
+time = 0:1:L-1;
+figure(2);
+imagesc(time, freal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
