@@ -9,7 +9,6 @@
 clear all, close all; clc
 
 %leitura do arquivo para elabora a transformada
-%x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3')'; %Base de dados de 6 meses
 x = xlsread('baseDeDados1Ano.xlsx',1,'B3:LXB3')'; %Base de dados de 1 ano.
 N = length(x);
 time = 0:1:N-1;
@@ -71,8 +70,8 @@ T3 = 1/freqMax3 %Período da terceira frequência (maior magnitude)
 
 %O T da função aproximada será o MMC dos períodos, já que as duas
 %frequências tem períodos diferentes.
-T = lcm(floor(T1),floor(T2))
-T = lcm(T, floor(T3))
+T = lcm(floor(T1),floor(T2));
+T = lcm(T, floor(T3)); %Período do sinal aproximado.
 
 %Sinal que tenha essa frequência 
 %Será da forma cos
@@ -95,14 +94,14 @@ subplot(2,1,2), stem(freal,angle(Y)),title('Fase'),xlabel('Frequência em amostr
 %Plotando resultados do sinal aproximado
 figure(2)
 subplot(2,1,1),
-plot(intervaloApoio,x), title('Sinal original'),xlabel('Horas a partir de 15 de junho às 0:00 h'),ylabel(' (MWh/h)');
+plot(intervaloApoio,x), title('Sinal original'),xlabel('tempo em horas a partir de 1 de janeiro'),ylabel(' (MWh/h)');
 subplot(2,1,2)
-plot(intervaloApoio,X2), title('Sinal aproximado'),xlabel('Horas a partir de 15 de junho às 0:00 h'),ylabel(' (MWh/h)');
+plot(intervaloApoio,X2), title('Sinal aproximado'),xlabel('tempo em horas a partir de 1 de janeiro'),ylabel(' (MWh/h)');
 
 %Comparando em mesma escala com o sinal original
 figure(3)
-plot(intervaloApoio,x,intervaloApoio,X2),title('Comparando os Sinais'),xlabel('Horas a partir de 15 de junho às 0:00 h'),ylabel(' (MWh/h)');
+plot(intervaloApoio,x,intervaloApoio,X2),title('Comparando os Sinais'),xlabel('tempo em horas a partir de 1 de janeiro'),ylabel(' (MWh/h)');
 
 %Mapa de calor
 figure(4);
-imagesc(time, freal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
+imagesc(time, freal, abs(Y)),xlabel('tempo em horas'),ylabel('frequencia em amostras/hora'),colorbar;
