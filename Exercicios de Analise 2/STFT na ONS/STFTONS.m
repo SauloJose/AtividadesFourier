@@ -1,35 +1,33 @@
 % ===================================================================================
-% Autor: Saulo José Almeida Silva
-% Descrição: Utilizando o método do STFT (Short Time Fourier Transformation) para ana-
-% lizar os dados de frequências nos dados da ONS;
-% Base de dados: curva de Carga Horária do dia 15 de junho de 2019, 0:00h até 16 de
-% dezembro de 2019. E Para a base de dados de 1 ano, vai do dia 1 de janeiro até 31
-% de dezembro de 2019.
-% Data: 14/03/2022
+% Autor: Saulo José Almeida Silva 
+% Descrição: Utilizando o método do STFT (Short Time Fourier Transformation)
+% para identificar os digitos discados num celular antigo 
+% Data: 13/03/2022
 % ===================================================================================
-%Limpeza
 clear all, close all; clc
 
 %leitura do arquivo para elabora a transformada
-%x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3')'; %Base de dados de 6 meses
-x = xlsread('baseDeDados1Ano.xlsx',1,'B3:LXB3')'; %Base de dados de 1 ano.
+[x, fs] = audioread('123456789.wav');
 L = length(x);
+realTime = L/fs;
+tempo = linspace(0,realTime, L);
 
-% ===============================|| Algorítmo do STFT ||=============================
+%sound(x,fs);%Exibir o som
+% =====================|| Aplicar transformada no sinal ||============================
 %Variáveis necessárias
 %quantidade de amostras de uma janela
-N = 1024;
+N = 512;
 
 %Passo para cada janela H, ou seja, quantas "amostras" ele pula para gerar
 %uma nova janela
-H = N/10;
+H = 256;
 
 %Número de janelas (subintervalos) divididos
 M = floor((L-N)/H);
 
 %função de janela
 t = linspace(-2,2,N); %variável intermediária
-w = exp((-t.^2)/15);
+w = exp((-t.^2)/1.5);
 
 %Matriz de base da transformada.
 matrizBase=((0:1:N-1)'*(0:1:N-1));
@@ -42,61 +40,103 @@ for a=0:1:M
         hx(:,a+1) = x(1+a*H:N+a*H)';
 end
 
+% ===================================================================================
 %Transformada de FOURIER de tempo Curto
-hx=w'.*hx; %Aplicando a função de janela gaussiana
+hx=w'.*hx;
+Y = BaseFT*hx;
+Y2 = fft(hx); %Utilizando apenas para comparar os resultados.
+%Cada coluna representa uma das janelas, e em cada janela existe N
+%amostras, para caracterizar as frequências e as fazes é necessário
+%realizar mais algumas transformações para cada número de cada coluna
 
-Y = BaseFT*hx; %<=Transformada STFT em si é a operação matricial
+%Foi necessário utilizar a transposta da função de janela w, pois assim
+%ficaria 1xN e então poderia aplicar para cada coluna da heinkelização
 
-%Normalizando valores, considerando cada janela
-Y = Y / N;
-% ===============================|buscando frequências|===================================
-%Tabelando frequências
-fs = 1; %1 amostra por hora
-freal = (0:N-1)*fs/N;
+%vetor frequências
+%frequência real = f(discreta) * f(amostragem)
 
-%Valor médio será o máximo dos valores médios das janelas
-Vmed=max(max(abs(Y(1,:))))
+freqDisc = 1/N; %Frequência+ discreta
+freqReal= freqDisc * fs * (0:1:N-1); %Em kHz
 
-%A frequência me maior amplitude será o máximo dos maiores valores de frequência 
-% das janelas
-freq=zeros(1,M+1);
+%plotando um gráfico específico
 
-%Buscando a frequência com maior energia/amplitude no espectro
-for m=1:1:M
-    [ValueMax, indice] = max(abs(Y(2:floor(N/2)+1,m)));
-    freq(m)=indice+1; %O índice discreto real é o encontrado +1.
+figure(1);
+plot(tempo, x), title('sinal sonoro'),xlabel('tempo em segundos')
+%title('fase'),xlabel('frequência em Hz')
+figure(3);imagesc(tempo, freqReal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
+
+% ==========================|| Encontrar os Dígitos ||================================
+%Preciso varrer cada janela, e observar as maiores frequências observadas.
+% para cada janela, observo apenas metade de N, e varro esse vetor buscando
+% e para essas amplitudes observo as frequências associadas a elas, em kHz
+
+%varrer as janelas e calcular as potências de cada uma
+pot = zeros(1,M+1);
+
+%Matriz para guardar os valores de frequência numa janela
+num = zeros(2,6);
+cont =1;
+intervalo1 = floor(N*600/fs)+1:floor(N*1000/fs)+1; %frequências menores
+intervalo2 = floor(N*1100/fs)+1:floor(N*1500/fs)+1; %frequencias maiores
+
+%Calcular todas as potências antes.
+for m=0:1:M
+    pot(m+1)=(hx(:,m+1)'*hx(:,m+1))*(1/N); %potência da janela Sum (x(n)^2)/N
+end
+potAux=pot;
+
+%Encontrar a potência máxima
+potMax =max(max(pot));
+
+%Transformar em pulsos retangulares.
+pulso = find(pot > 0.15*potMax);
+pot(pulso)=potMax;
+
+for m=0:1:M
+    %procurar as janelas cuja potência indique que haja frequência
+    if (pot(1,m+1) >= potMax*0.2)%se a potência é grande
+        %dividindo as frequência
+        if m+25 < M-1 %Pegar um valor mais central do pulso
+            %frequências de 600 a 1000hz
+            Ymin = abs(Y(intervalo1,m+25));
+            [a, f1Max] = max(Ymin);
+            f1Max = (intervalo1(f1Max)-1)*fs/N;
+        
+            %frequências de 1100 a 1500 hz
+            Ymax = abs(Y(intervalo2,m+25));
+            [a, f2Max] = max(Ymax);
+            f2Max =(intervalo2(f2Max)-1)*fs/N; 
+        else
+            %frequências de 600 a 1000hz
+            Ymin = abs(Y(intervalo1,m+1));
+            [a, f1Max] = max(Ymin);
+            f1Max = (intervalo1(f1Max)-1)*fs/N;
+        
+            %frequências de 1100 a 1500 hz
+            Ymax = abs(Y(intervalo2,m+1));
+            [a, f2Max] = max(Ymax);
+            f2Max =(intervalo2(f2Max)-1)*fs/N;            
+        end
+        
+        %analisando se esse valor deve ou não ser guardado
+        if (m > 20 && pot(1,m) < potMax*0.3) %antes de um pulso
+            num(:,cont) = [f1Max; f2Max];
+            cont = cont+1;
+        end
+    end
 end
 
-%Indice que representa a frequência discretizada da transformada Y.
-k1=max(freq(m));
-freqMax = (k1+1)*fs/N; %Pego k+1, pois o k1 corresponde ao valor anterior ao k real
+figure(2)
+plot(0:M,pot,0:M,potAux), title('Potencia do sinal em cada janela'),xlabel('indice da janela')
 
 
-%Períoda da parcela oscilatória de maior amplitude no espectro da
-%transformada.
-T=ceil(1/freqMax)
+% ==========================|| Função para identificar digitos ||================================
+digitos=zeros(1,length(num));
 
-%Consequêntemente, o período da frequência maior do sinal será T horas
-%Pode-se observar que para esse caso aqui, a STFT não é tão eficiente, como
-%a DFT foi na análise desses dados.
-% ===============================|PLOTANDO DADOS|===================================
-S = 20; %Número da janela
-Amostras = 0:L-1;
+for m=1:1:length(num)
+    digitos(m) = showDigit(num(1,m),num(2,m));
+end
 
-%Plotando sinal original
-figure(1);
-subplot(3,1,1), plot(Amostras, x), title('Sinal original'),xlabel('Horas a partir de 15 de junho Às 0:00 h'),ylabel(' (MWh/h)');
+%Exibindo digitos
+digitos
 
-%Strings necessárias
-str = "módulo do STFT na janela "+S;
-str2= "Fase do STFT na janela"+S;
-
-%Plotando Transformada STFT na janela
-subplot(3,1,2), stem(freal, abs(Y(:,S))), title(str),xlabel('Frequência em amostras/Hora');
-subplot(3,1,3), stem(freal, angle(Y(:,S))), title(str2),xlabel('Frequência em amostras/Hora');
-
-
-%Tempo entre cada amostra
-time = 0:1:L-1;
-figure(2);
-imagesc(time, freal, abs(Y)),xlabel('tempo'),ylabel('frequencia'),colorbar;
