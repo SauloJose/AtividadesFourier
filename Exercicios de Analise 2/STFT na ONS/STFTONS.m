@@ -4,19 +4,20 @@
 % lizar os dados de frequências nos dados da ONS, que nesse caso foi as
 % curva de Carga Horária do dia 15 de junho de 2019, 0:00h até 16 de
 % dezembro de 2019.
-% Data: 14/02/2022
+% Data: 14/03/2022
 % ===================================================================================
 %Limpeza
 clear all, close all; clc
 
 %leitura do arquivo para elabora a transformada
-x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3');
+%x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3')'; %Base de dados de 6 meses
+x = xlsread('baseDeDados1Ano.xlsx',1,'B3:LXB3')'; %Base de dados de 1 ano.
 L = length(x);
 
 % ===============================|| Algorítmo do STFT ||=============================
 %Variáveis necessárias
 %quantidade de amostras de uma janela
-N = 256;
+N = 1024;
 
 %Passo para cada janela H, ou seja, quantas "amostras" ele pula para gerar
 %uma nova janela
@@ -67,11 +68,11 @@ end
 
 %Indice que representa a frequência discretizada da transformada Y.
 k1=max(freq(m));
+freqMax = (k1+1)*fs/N; %Pego k+1, pois o k1 corresponde ao valor anterior ao k real
 
-freqMax = (k1+1)*fs/N; %Pego k+1, pois é o valor após
 
-
-%Período do maior sinal
+%Períoda da parcela oscilatória de maior amplitude no espectro da
+%transformada.
 T=ceil(1/freqMax)
 
 %Consequêntemente, o período da frequência maior do sinal será T horas
