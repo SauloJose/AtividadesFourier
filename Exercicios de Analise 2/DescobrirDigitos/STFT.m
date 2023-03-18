@@ -94,7 +94,7 @@ pot(pulso)=potMax;
 
 for m=0:1:M
     %procurar as janelas cuja potência indique que haja frequência
-    if (pot(1,m+1) >= potMax*0.25)%se a potência é grande
+    if (pot(1,m+1) >= potMax*0.2)%se a potência é grande
         %dividindo as frequência
         if m+25 < M-1 %Pegar um valor mais central do pulso
             %frequências de 600 a 1000hz
@@ -103,7 +103,6 @@ for m=0:1:M
             f1Max = (intervalo1(f1Max)-1)*fs/N;
         
             %frequências de 1100 a 1500 hz
-        
             Ymax = abs(Y(intervalo2,m+25));
             [a, f2Max] = max(Ymax);
             f2Max =(intervalo2(f2Max)-1)*fs/N; 
