@@ -2,13 +2,15 @@
 % Autor: Saulo José Almeida Silva
 % Descrição: Utilizando o método do DFT (Discrete Fourier Transformation) para ana-
 % lizar os dados de frequências nos dados da ONS, e buscar um padrão nesses
-% dados
-% Data: 14/02/2022
+% dados. A base de dados utilizadas foi a curva de carga horária do dia 1
+% de janeiro de 2019 até o dia 31 de dezembro de 2019
+% Data: 14/03/2022
 % ===================================================================================
 clear all, close all; clc
 
 %leitura do arquivo para elabora a transformada
-x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3')';
+%x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3')'; %Base de dados de 6 meses
+x = xlsread('baseDeDados1Ano.xlsx',1,'B3:LXB3')'; %Base de dados de 1 ano.
 N = length(x);
 time = 0:1:N-1;
 % ===============================|| Algorítmo do DFT ||=============================
@@ -32,9 +34,10 @@ freal = (0:N-1)*fs/N;
 %Calculando valor médio do sinal
 Vmed = Y(1) %Os dados já estão normalizados
 
-% Analisando a DFT do sinal, observa-se que existe duas frequências que se
-% sobresaem, portanto, o pode ser aproximado com uma função dessas duas
-% frequências, da forma Xm(t)=Vmed + 2*A1*cos(w1*t+o1)+2*A2*cos(w2*t+o2);
+% Analisando a DFT do sinal, observa-se que existe três frequências que se
+% sobresaem, portanto, o pode ser aproximado com uma função dessas três
+% frequências, da forma
+% Xm(t)=Vmed + 2*A1*cos(w1*t+o1)+2*A2*cos(w2*t+o2)+2*A3*cos(w3*t+o3);
 % Buscarei o valores dessas frequências, e tomarei como o período o maior
 % entre eles...
 
@@ -51,23 +54,35 @@ Yapoio(k1+1,1) = 0;%Zerando essa frequência e buscando a outra segunda maior.
 [Amp2, k2] = max(abs(Yapoio(2:floor(N/2)+1,1)));
 freqMax2 = freal(k2+1);
 
+%Procurando a terceira frequência de maior intensidade
+Yapoio(k2+1,1)=0;
+[Amp3, k3] = max(abs(Yapoio(2:floor(N/2)+1,1)));
+freqMax3 = freal(k3+1);
+
 %Período real
 T1 = 1/freqMax1 %Período da primeira frequência (maior magnitude)
-T2 = 1/freqMax2 %Período da segunda frequências (menor magnitude)
+T2 = 1/freqMax2 %Período da segunda frequências (maior magnitude)
+T3 = 1/freqMax3 %Período da terceira frequência (maior magnitude)
+
+%Observação: T1 é o período da frequência de maior magnitude, que condize
+%com a variação períodica que mais se sobressai. Os períodos T2 e T3 são
+%das outras frequências, que são responsáveis pelos dois comportamentos
+%oscilatórios de maior intensidade após o primeiro.
 
 %O T da função aproximada será o MMC dos períodos, já que as duas
 %frequências tem períodos diferentes.
 T = lcm(floor(T1),floor(T2))
+T = lcm(T, floor(T3))
 
 %Sinal que tenha essa frequência 
 %Será da forma cos
 fase1 = angle(Y(k1+1));
 fase2 = angle(Y(k2+1));
-
+fase3 = angle(Y(k3+1));
 intervaloApoio = (0:N-1);
 
 %Função aproximada para o sinal com as duas maiores frequências
-X2 = Vmed+2*(Amp1*cos(intervaloApoio*2*pi*freqMax1+fase1)+Amp2*cos(intervaloApoio*2*pi*freqMax2+fase2));
+X2 = Vmed+2*(Amp1*cos(intervaloApoio*2*pi*freqMax1+fase1)+Amp2*cos(intervaloApoio*2*pi*freqMax2+fase2)+Amp3*cos(intervaloApoio*2*pi*freqMax3+fase3));
 
 %Portanto a cada T horas, a função aproximada X2 se repete, porém, a cada T1
 %horas, a maior frequência se repete.
