@@ -12,7 +12,8 @@ clear all, close all; clc
 pkg load io;
 
 %leitura do arquivo para elabora a transformada
-x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3');
+%x = xlsread('CurvaCargaHoraria.xlsx',1,'B3:DIP3')'; %Base de dados de 6 meses
+x = xlsread('baseDeDados1Ano.xlsx',1,'B3:LXB3')'; %Base de dados de 1 ano.
 L = length(x);
 
 % ===============================|| Algorítmo do STFT ||=============================
