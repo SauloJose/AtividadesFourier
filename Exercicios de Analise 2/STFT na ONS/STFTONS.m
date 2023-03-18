@@ -1,9 +1,10 @@
 % ===================================================================================
 % Autor: Saulo José Almeida Silva
 % Descrição: Utilizando o método do STFT (Short Time Fourier Transformation) para ana-
-% lizar os dados de frequências nos dados da ONS, que nesse caso foi as
-% curva de Carga Horária do dia 15 de junho de 2019, 0:00h até 16 de
-% dezembro de 2019.
+% lizar os dados de frequências nos dados da ONS;
+% Base de dados: curva de Carga Horária do dia 15 de junho de 2019, 0:00h até 16 de
+% dezembro de 2019. E Para a base de dados de 1 ano, vai do dia 1 de janeiro até 31
+% de dezembro de 2019.
 % Data: 14/03/2022
 % ===================================================================================
 %Limpeza
